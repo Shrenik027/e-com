@@ -19,13 +19,6 @@ app.use(express.json());
 
 const cors = require("cors");
 
-const cors = require("cors");
-
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://e-com-frontend.vercel.app", // 👈 YOUR ACTUAL FRONTEND URL
-];
-
 app.use(cors());
 
 // 🚨 VERY IMPORTANT: this ensures POST also gets CORS headers
