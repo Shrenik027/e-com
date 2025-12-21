@@ -22,7 +22,10 @@ const cors = require("cors");
 // middleware
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: [
+      "http://localhost:3000",
+      "https://e-com-frontend-henna.vercel.app/",
+    ],
     credentials: true,
   })
 );
