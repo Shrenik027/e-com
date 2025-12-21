@@ -19,9 +19,6 @@ app.use(express.json());
 
 const cors = require("cors");
 
-// middleware
-const cors = require("cors");
-
 app.use(
   cors({
     origin: [
