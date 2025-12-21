@@ -19,19 +19,16 @@ app.use(express.json());
 
 const cors = require("cors");
 
-app.use(
-  cors({
-    origin: [
-      "http://localhost:3000",
-      "https://e-com-frontend-nine-phi.vercel.app/", // 👈 YOUR ACTUAL FRONTEND URL
-    ],
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: false, // since you're using JWT, NOT cookies
-  })
-);
+const cors = require("cors");
 
-// 🔥 IMPORTANT: handle preflight explicitly
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://e-com-frontend.vercel.app", // 👈 YOUR ACTUAL FRONTEND URL
+];
+
+app.use(cors());
+
+// 🚨 VERY IMPORTANT: this ensures POST also gets CORS headers
 app.options("*", cors());
 
 // Routes
