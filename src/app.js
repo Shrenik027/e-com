@@ -20,15 +20,22 @@ app.use(express.json());
 const cors = require("cors");
 
 // middleware
+const cors = require("cors");
+
 app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "https://e-com-frontend-nine-phi.vercel.app/",
+      "https://e-com-frontend-nine-phi.vercel.app/", // 👈 YOUR ACTUAL FRONTEND URL
     ],
-    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: false, // since you're using JWT, NOT cookies
   })
 );
+
+// 🔥 IMPORTANT: handle preflight explicitly
+app.options("*", cors());
 
 // Routes
 app.use("/api/v1/auth", authRoutes);
