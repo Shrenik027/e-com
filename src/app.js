@@ -24,7 +24,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "https://e-com-frontend-henna.vercel.app/",
+      "https://e-com-frontend-nine-phi.vercel.app/",
     ],
     credentials: true,
   })
