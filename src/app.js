@@ -1,9 +1,10 @@
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
+
 const authRoutes = require("./routes/auth.routes");
 const userRoutes = require("./routes/user.routes");
-const errorMiddleware = require("./middlewares/error.middleware");
 const productRoutes = require("./routes/product.routes");
 const categoryRoutes = require("./routes/category.routes");
 const brandRoutes = require("./routes/brand.routes");
@@ -12,22 +13,27 @@ const couponRoutes = require("./routes/coupon.routes");
 const shippingRoutes = require("./routes/shippingMethod.routes");
 const orderRoutes = require("./routes/order.routes");
 const paymentRoutes = require("./routes/payment.routes");
+const errorMiddleware = require("./middlewares/error.middleware");
 
 const app = express();
-// Middleware
+
+/* -------------------- Middleware -------------------- */
+app.set("trust proxy", 1);
 app.use(express.json());
 
-const cors = require("cors");
-
-// middleware
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:3000", process.env.FRONTEND_URL],
     credentials: true,
   })
 );
 
-// Routes
+/* -------------------- Health Check -------------------- */
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "OK", uptime: process.uptime() });
+});
+
+/* -------------------- Routes -------------------- */
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/products", productRoutes);
@@ -39,21 +45,23 @@ app.use("/api/v1/shipping-methods", shippingRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/payments", paymentRoutes);
 
-// Global Error Handler (must be last)
+/* -------------------- Error Handler -------------------- */
 app.use(errorMiddleware);
 
+/* -------------------- Server Start -------------------- */
 const PORT = process.env.PORT || 5000;
 
 const start = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
-    console.log("Connected to MongoDB");
+    console.log("✅ Connected to MongoDB");
 
     app.listen(PORT, () => {
-      console.log(`Server is running at: http://localhost:${PORT}`);
+      console.log(`🚀 Server running on port ${PORT}`);
     });
   } catch (error) {
-    console.log("Error starting the Server", error);
+    console.error("❌ Error starting server:", error);
+    process.exit(1);
   }
 };
 
