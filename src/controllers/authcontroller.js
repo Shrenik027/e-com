@@ -9,17 +9,9 @@ const strongPasswordRegex =
 const register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        message: "Name, email and password are required",
-      });
-    }
 
-    if (!strongPasswordRegex.test(password)) {
-      return res.status(400).json({
-        message:
-          "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character",
-      });
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "All fields required" });
     }
 
     const existingUser = await User.findOne({ email });
@@ -32,7 +24,7 @@ const register = async (req, res, next) => {
     await User.create({
       name,
       email,
-      password, // ✅ PLAIN PASSWORD
+      password,
       emailVerified: false,
       emailVerificationToken: verificationToken,
       emailVerificationExpires: Date.now() + 24 * 60 * 60 * 1000,
@@ -40,77 +32,22 @@ const register = async (req, res, next) => {
 
     const verifyUrl = `${process.env.BACKEND_URL}/api/v1/auth/verify-email?token=${verificationToken}`;
 
+    // ✅ RESPOND IMMEDIATELY (frontend never blocks)
     res.status(201).json({
-      message: "Account created. Verification email will be sent shortly.",
+      message: "Account created. Verification email will be sent.",
     });
 
+    // ✅ EMAIL IS FIRE-AND-FORGET
     sendEmail({
       to: email,
-      subject: "Verify your email to activate your account",
+      subject: "Verify your email",
       html: `
-  <div style="background-color:#f4f6f8;padding:40px 0;font-family:Arial,Helvetica,sans-serif;">
-    <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-      
-      <!-- Header -->
-      <div style="padding:24px 32px;border-bottom:1px solid #eaeaea;">
-        <h2 style="margin:0;color:#111827;font-size:22px;">
-          Welcome to Ecommerce 👋
-        </h2>
-      </div>
-
-      <!-- Body -->
-      <div style="padding:32px;color:#374151;line-height:1.6;font-size:15px;">
-        <p style="margin-top:0;">
-          Thanks for creating an account with <strong>Ecommerce</strong>.
-        </p>
-
-        <p>
-          To keep your account secure and get full access, please confirm your email address by clicking the button below.
-        </p>
-
-        <!-- CTA Button -->
-        <div style="text-align:center;margin:32px 0;">
-          <a
-            href="${verifyUrl}"
-            style="
-              display:inline-block;
-              background:#2563eb;
-              color:#ffffff;
-              text-decoration:none;
-              padding:14px 28px;
-              border-radius:6px;
-              font-weight:600;
-              font-size:15px;
-            "
-          >
-            Verify Email Address
-          </a>
-        </div>
-
-        <p>
-          Once verified, your account will be fully activated and ready to use.
-        </p>
-
-        <p>
-          If you didn’t create this account, you can safely ignore this email.
-        </p>
-
-        <p style="margin-bottom:0;">
-          Best regards,<br />
-          <strong>The Ecommerce Team</strong>
-        </p>
-      </div>
-
-      <!-- Footer -->
-      <div style="padding:20px 32px;background:#f9fafb;border-top:1px solid #eaeaea;font-size:12px;color:#6b7280;">
-        <p style="margin:0;">
-          This verification link will expire in 24 hours for security reasons.
-        </p>
-      </div>
-
-    </div>
-  </div>
-`,
+        <h2>Welcome 👋</h2>
+        <p>Verify your email:</p>
+        <a href="${verifyUrl}">Verify Email</a>
+      `,
+    }).catch((err) => {
+      console.error("Email failed:", err.message);
     });
   } catch (error) {
     next(error);
