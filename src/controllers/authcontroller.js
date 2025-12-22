@@ -40,10 +40,6 @@ const register = async (req, res, next) => {
 
     const verifyUrl = `${process.env.BACKEND_URL}/api/v1/auth/verify-email?token=${verificationToken}`;
 
-    res.status(201).json({
-      message: "Registration successful. Please verify your email.",
-    });
-
     console.log("📩 Sending verification email to:", email);
 
     await sendEmail({
