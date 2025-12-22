@@ -46,7 +46,7 @@ const register = async (req, res, next) => {
 
     console.log("📩 Sending verification email to:", email);
 
-    sendEmail({
+    await sendEmail({
       to: email,
       subject: "Verify your email to activate your account",
       html: `
@@ -114,11 +114,12 @@ const register = async (req, res, next) => {
   </div>
 `,
     });
+
+    return res.status(201).json({
+      message: "Account created. Please check your email to verify.",
+    });
   } catch (error) {
-    console.error("Register error:", error);
-    if (!res.headersSent) {
-      res.status(500).json({ message: "Registration failed" });
-    }
+    next(error);
   }
 };
 
