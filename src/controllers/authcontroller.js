@@ -45,6 +45,8 @@ const register = async (req, res, next) => {
       message: "Registration successful. Please verify your email.",
     });
 
+    console.log("About to send verification email to:", email);
+
     await sendEmail({
       to: email,
       subject: "Verify your email to activate your account",
