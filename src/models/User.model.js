@@ -14,22 +14,6 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      validate: {
-        validator: function (value) {
-          // Skip validation for Google users (dummy password)
-          if (!value) return true;
-
-          return (
-            value.length >= 8 &&
-            /[A-Z]/.test(value) &&
-            /[a-z]/.test(value) &&
-            /[0-9]/.test(value) &&
-            /[^A-Za-z0-9]/.test(value)
-          );
-        },
-        message:
-          "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character",
-      },
     },
 
     role: {

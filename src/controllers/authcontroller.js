@@ -10,6 +10,12 @@ const strongPasswordRegex =
 const register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        message: "Name, email and password are required",
+      });
+    }
+
     if (!strongPasswordRegex.test(password)) {
       return res.status(400).json({
         message:
@@ -35,6 +41,10 @@ const register = async (req, res, next) => {
 
     const verifyUrl = `${process.env.BACKEND_URL}/api/v1/auth/verify-email?token=${verificationToken}`;
 
+    res.status(201).json({
+      message: "Registration successful. Please verify your email.",
+    });
+
     await sendEmail({
       to: email,
       subject: "Verify your email",
@@ -43,10 +53,6 @@ const register = async (req, res, next) => {
         <p>Please verify your email to continue:</p>
         <a href="${verifyUrl}">Verify Email</a>
       `,
-    });
-
-    res.status(201).json({
-      message: "Registration successful. Please verify your email.",
     });
   } catch (error) {
     next(error);
@@ -110,7 +116,7 @@ const login = async (req, res) => {
       token,
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    next(error);
   }
 };
 
@@ -127,11 +133,13 @@ const googleLogin = async (req, res) => {
 
     // If user does NOT exist → create Google user
     if (!user) {
+      const randomPassword = crypto.randomBytes(32).toString("hex");
+
       user = await User.create({
         name: name || email.split("@")[0],
         email,
-        emailVerified: true, // Google already verified
-        password: crypto.randomBytes(20).toString("hex"), // dummy password
+        password: randomPassword, // will be hashed
+        emailVerified: true,
       });
     }
 
