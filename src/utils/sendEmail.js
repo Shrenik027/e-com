@@ -1,21 +1,10 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendEmail = async ({ to, subject, html }) => {
-  const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false, // TLS
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS, // Gmail App Password
-    },
-    connectionTimeout: 10_000, // 10s
-    greetingTimeout: 10_000,
-    socketTimeout: 10_000,
-  });
-
-  await transporter.sendMail({
-    from: `"Ecommerce" <${process.env.EMAIL_USER}>`,
+  await resend.emails.send({
+    from: "Ecommerce <onboarding@resend.dev>",
     to,
     subject,
     html,

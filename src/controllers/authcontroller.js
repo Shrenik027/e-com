@@ -1,7 +1,6 @@
 const User = require("../models/User.model");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const bcrypt = require("bcrypt");
 const sendEmail = require("../utils/sendEmail");
 const strongPasswordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
@@ -114,7 +113,10 @@ const register = async (req, res, next) => {
 `,
     });
   } catch (error) {
-    next(error);
+    console.error("Register error:", error);
+    if (!res.headersSent) {
+      res.status(500).json({ message: "Registration failed" });
+    }
   }
 };
 
