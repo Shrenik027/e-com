@@ -40,9 +40,11 @@ const register = async (req, res, next) => {
 
     const verifyUrl = `${process.env.BACKEND_URL}/api/v1/auth/verify-email?token=${verificationToken}`;
 
-    console.log("📩 Sending verification email to:", email);
+    res.status(201).json({
+      message: "Account created. Verification email will be sent shortly.",
+    });
 
-    await sendEmail({
+    sendEmail({
       to: email,
       subject: "Verify your email to activate your account",
       html: `
@@ -109,10 +111,6 @@ const register = async (req, res, next) => {
     </div>
   </div>
 `,
-    });
-
-    return res.status(201).json({
-      message: "Account created. Please check your email to verify.",
     });
   } catch (error) {
     next(error);
