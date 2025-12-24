@@ -1,16 +1,19 @@
+// utils/sendEmail.js
 const nodemailer = require("nodemailer");
 
-const sendEmail = async ({ to, subject, html }) => {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS, // Gmail App Password
-    },
-  });
+const transporter = nodemailer.createTransport({
+  host: "smtp.zoho.in",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.ZOHO_EMAIL, // support@shrix.store
+    pass: process.env.ZOHO_APP_PASSWORD, // Zoho App Password
+  },
+});
 
+const sendEmail = async ({ to, subject, html }) => {
   await transporter.sendMail({
-    from: `"Ecommerce" <${process.env.EMAIL_USER}>`,
+    from: `"Shrix Support" <${process.env.ZOHO_EMAIL}>`,
     to,
     subject,
     html,
