@@ -1,10 +1,7 @@
 const User = require("../models/User.model");
 const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
-const sendEmail = require("../utils/sendEmail");
-const strongPasswordRegex =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
 
+/* ================= REGISTER ================= */
 /* ================= REGISTER ================= */
 const register = async (req, res, next) => {
   try {
@@ -19,68 +16,23 @@ const register = async (req, res, next) => {
       return res.status(400).json({ message: "Email already registered" });
     }
 
-    const verificationToken = crypto.randomBytes(32).toString("hex");
-
     await User.create({
       name,
       email,
       password,
-      emailVerified: false,
-      emailVerificationToken: verificationToken,
-      emailVerificationExpires: Date.now() + 24 * 60 * 60 * 1000,
+      emailVerified: true, // ✅ IMPORTANT: AUTO VERIFIED
     });
 
-    const verifyUrl = `${process.env.BACKEND_URL}/api/v1/auth/verify-email?token=${verificationToken}`;
-
-    // ✅ RESPOND IMMEDIATELY (frontend never blocks)
     res.status(201).json({
-      message: "Account created. Verification email will be sent.",
-    });
-
-    // ✅ EMAIL IS FIRE-AND-FORGET
-    sendEmail({
-      to: email,
-      subject: "Verify your email",
-      html: `
-        <h2>Welcome 👋</h2>
-        <p>Verify your email:</p>
-        <a href="${verifyUrl}">Verify Email</a>
-      `,
-    }).catch((err) => {
-      console.error("Email failed:", err.message);
+      message: "Account created successfully",
     });
   } catch (error) {
     next(error);
   }
 };
 
-/* ================= VERIFY EMAIL ================= */
-const verifyEmail = async (req, res, next) => {
-  try {
-    const { token } = req.query;
-
-    const user = await User.findOne({
-      emailVerificationToken: token,
-      emailVerificationExpires: { $gt: Date.now() },
-    });
-
-    if (!user) {
-      return res.redirect(`${process.env.FRONTEND_URL}/account?verified=false`);
-    }
-
-    user.emailVerified = true;
-    user.emailVerificationToken = null;
-    user.emailVerificationExpires = null;
-    await user.save();
-
-    res.redirect(`${process.env.FRONTEND_URL}/account?verified=true`);
-  } catch (err) {
-    next(err);
-  }
-};
-
 /* ================= LOGIN ================= */
-const login = async (req, res) => {
+const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -92,12 +44,6 @@ const login = async (req, res) => {
     const isPasswordCorrect = await user.comparePassword(password);
     if (!isPasswordCorrect) {
       return res.status(401).json({ error: "Invalid credentials" });
-    }
-
-    if (!user.emailVerified) {
-      return res.status(401).json({
-        error: "Please verify your email before logging in",
-      });
     }
 
     const token = jwt.sign(
@@ -167,7 +113,6 @@ const googleLogin = async (req, res) => {
 
 module.exports = {
   register,
-  verifyEmail,
   login,
   googleLogin,
 };
