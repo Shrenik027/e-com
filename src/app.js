@@ -16,6 +16,7 @@ const paymentRoutes = require("./routes/payment.routes");
 const app = express();
 // Middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const cors = require("cors");
 
