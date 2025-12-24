@@ -178,20 +178,23 @@ const register = async (req, res, next) => {
 </html>
 `;
 
-    await sendEmail({
-      to: email,
-      subject: "Welcome to Shrix 🎉 Please verify your email",
-      html: emailHtml,
-    });
-
     res.status(201).json({
       message: "Registration successful. Please verify your email.",
     });
+
+    sendEmail({
+      to: email,
+      subject: "Welcome to Shrix 🎉 Please verify your email",
+      html: emailHtml,
+    }).catch((err) => {
+      console.error("Email send failed:", err.message);
+    });
+
+    return; // ✅ stop execution
   } catch (error) {
     next(error);
   }
 };
-
 const verifyEmail = async (req, res) => {
   const { token } = req.query;
 

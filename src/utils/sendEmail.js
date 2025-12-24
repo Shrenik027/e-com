@@ -1,4 +1,3 @@
-// utils/sendEmail.js
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
@@ -6,12 +5,15 @@ const transporter = nodemailer.createTransport({
   port: 587,
   secure: false,
   auth: {
-    user: process.env.ZOHO_EMAIL, // support@shrix.store
-    pass: process.env.ZOHO_APP_PASSWORD, // Zoho App Password
+    user: process.env.ZOHO_EMAIL,
+    pass: process.env.ZOHO_APP_PASSWORD,
   },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
 });
 
-const sendEmail = async ({ to, subject, html }) => {
+module.exports = async function sendEmail({ to, subject, html }) {
   await transporter.sendMail({
     from: `"Shrix Support" <${process.env.ZOHO_EMAIL}>`,
     to,
@@ -19,5 +21,3 @@ const sendEmail = async ({ to, subject, html }) => {
     html,
   });
 };
-
-module.exports = sendEmail;
