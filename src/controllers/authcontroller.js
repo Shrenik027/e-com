@@ -24,7 +24,7 @@ const register = async (req, res, next) => {
       name,
       email,
       password,
-      emailVerified: false,
+      emailVerified: true,
       emailVerificationToken: verificationToken,
       emailVerificationExpires: Date.now() + 24 * 60 * 60 * 1000,
     });
