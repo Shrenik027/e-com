@@ -90,3 +90,32 @@ exports.removeCoupon = async (req, res, next) => {
     next(err);
   }
 };
+
+/* ==========================
+   GET ALL COUPONS (ADMIN)
+========================== */
+exports.getAllCoupons = async (req, res, next) => {
+  try {
+    const coupons = await Coupon.find().sort({ createdAt: -1 });
+    res.json({ coupons });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/* ==========================
+   DELETE COUPON (ADMIN)
+========================== */
+exports.deleteCoupon = async (req, res, next) => {
+  try {
+    const coupon = await Coupon.findByIdAndDelete(req.params.couponId);
+
+    if (!coupon) {
+      return res.status(404).json({ error: "Coupon not found" });
+    }
+
+    res.json({ message: "Coupon deleted" });
+  } catch (err) {
+    next(err);
+  }
+};

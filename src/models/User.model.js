@@ -20,6 +20,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "user",
     },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+
     phone: {
       type: String,
       match: [/^\+?[\d\s-]{10,}$/, "Please"],

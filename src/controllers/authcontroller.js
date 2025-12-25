@@ -225,6 +225,13 @@ const login = async (req, res, next) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
+    // 🔒 BLOCKED USER CHECK (ADD THIS)
+    if (user.isActive === false) {
+      return res.status(403).json({
+        error: "Your account has been blocked. Contact support.",
+      });
+    }
+
     // ✅ Check email verification AFTER fetching user
     if (!user.emailVerified) {
       return res.status(401).json({

@@ -51,8 +51,46 @@ async function getOrderById(orderId, userId) {
   return order;
 }
 
+async function getAllOrders() {
+  return Order.find().populate("user", "name email").sort({ createdAt: -1 });
+}
+
+async function updateOrderStatus(orderId, newStatus) {
+  const order = await Order.findById(orderId);
+  if (!order)
+    throw Object.assign(new Error("Order not found"), { statusCode: 404 });
+
+  // ❌ Prevent changing terminal states
+  if (["delivered", "cancelled"].includes(order.orderStatus)) {
+    throw Object.assign(new Error("Order status cannot be changed"), {
+      statusCode: 400,
+    });
+  }
+
+  // Optional logical transitions
+  const flow = {
+    placed: ["confirmed", "cancelled"],
+    confirmed: ["shipped", "cancelled"],
+    shipped: ["delivered"],
+  };
+
+  if (flow[order.orderStatus] && !flow[order.orderStatus].includes(newStatus)) {
+    throw Object.assign(
+      new Error(`Invalid transition from ${order.orderStatus}`),
+      { statusCode: 400 }
+    );
+  }
+
+  order.orderStatus = newStatus;
+  await order.save();
+
+  return order;
+}
+
 module.exports = {
   placeOrder,
   getMyOrders,
   getOrderById,
+  getAllOrders,
+  updateOrderStatus,
 };

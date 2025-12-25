@@ -31,4 +31,10 @@ router.post(
 // Remove coupon
 router.delete("/remove", auth, couponController.removeCoupon);
 
+// Admin list coupons
+router.get("/", auth, role("admin"), couponController.getAllCoupons);
+
+// Admin delete coupon
+router.delete("/:couponId", auth, role("admin"), couponController.deleteCoupon);
+
 module.exports = router;

@@ -14,6 +14,12 @@ const {
 // Public — list available shipping methods
 router.get("/", controller.getShippingMethods);
 router.get("/:id", controller.getShippingMethod);
+router.get(
+  "/admin/all",
+  auth,
+  role("admin"),
+  controller.getAllShippingMethodsAdmin
+);
 
 // Admin only routes
 router.post(

@@ -12,6 +12,10 @@ const couponRoutes = require("./routes/coupon.routes");
 const shippingRoutes = require("./routes/shippingMethod.routes");
 const orderRoutes = require("./routes/order.routes");
 const paymentRoutes = require("./routes/payment.routes");
+const adminRoutes = require("./routes/admin.routes");
+const adminOrderRoutes = require("./routes/admin.order.routes");
+const adminUserRoutes = require("./routes/admin.user.routes");
+const adminDashboardRoutes = require("./routes/admin.dashboard.routes");
 
 const app = express();
 // Middleware
@@ -36,6 +40,10 @@ app.use("/api/v1/coupons", couponRoutes);
 app.use("/api/v1/shipping-methods", shippingRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/payments", paymentRoutes);
+app.use("/api/v1/admin", adminRoutes);
+app.use("/api/v1/admin/orders", adminOrderRoutes);
+app.use("/api/v1/admin/users", adminUserRoutes);
+app.use("/api/v1/admin/dashboard", adminDashboardRoutes);
 
 // Global Error Handler (must be last)
 app.use(errorMiddleware);
