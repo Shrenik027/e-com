@@ -4,7 +4,6 @@ const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
 
 /* ================= REGISTER ================= */
-/* ================= REGISTER ================= */
 const register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
@@ -18,14 +17,19 @@ const register = async (req, res, next) => {
       return res.status(400).json({ message: "Email already registered" });
     }
 
+    // 🔐 Generate verification token
     const verificationToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(verificationToken)
+      .digest("hex");
 
-    const user = await User.create({
+    await User.create({
       name,
       email,
       password,
-      emailVerified: true,
-      emailVerificationToken: verificationToken,
+      emailVerified: false,
+      emailVerificationToken: hashedToken,
       emailVerificationExpires: Date.now() + 24 * 60 * 60 * 1000,
     });
 
@@ -34,147 +38,15 @@ const register = async (req, res, next) => {
     const emailHtml = `
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Verify your email</title>
-  </head>
-  <body
-    style="
-      margin: 0;
-      padding: 0;
-      background-color: #f9fafb;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
-        Roboto, Helvetica, Arial, sans-serif;
-      color: #111827;
-    "
-  >
-    <table width="100%" cellpadding="0" cellspacing="0">
-      <tr>
-        <td align="center" style="padding: 40px 16px">
-          <table
-            width="100%"
-            cellpadding="0"
-            cellspacing="0"
-            style="
-              max-width: 560px;
-              background-color: #ffffff;
-              border-radius: 12px;
-              box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
-              overflow: hidden;
-            "
-          >
-            <tr>
-              <td
-                style="
-                  padding: 28px 32px;
-                  background: linear-gradient(
-                    135deg,
-                    #f59e0b,
-                    #f97316
-                  );
-                  color: #ffffff;
-                "
-              >
-                <h1 style="margin: 0; font-size: 22px; font-weight: 700">
-                  Welcome to Shrix 🎉
-                </h1>
-                <p style="margin: 6px 0 0; font-size: 14px; opacity: 0.9">
-                  Your account has been created successfully
-                </p>
-              </td>
-            </tr>
-
-            <tr>
-              <td style="padding: 32px">
-                <p style="font-size: 16px; margin: 0 0 16px">
-                  Hi 👋,
-                </p>
-
-                <p style="font-size: 15px; line-height: 1.6; margin: 0 0 20px">
-                  Thank you for creating an account with <strong>Shrix</strong>.
-                  You’re just one step away from getting started.
-                </p>
-
-                <p style="font-size: 15px; line-height: 1.6; margin: 0 0 28px">
-                  Please verify your email address to activate your account and
-                  enjoy a secure shopping experience.
-                </p>
-
-                <div style="text-align: center; margin: 32px 0">
-                  <a
-                    href="${verifyLink}"
-                    style="
-                      background: linear-gradient(
-                        135deg,
-                        #f59e0b,
-                        #f97316
-                      );
-                      color: #ffffff;
-                      text-decoration: none;
-                      padding: 14px 28px;
-                      font-size: 15px;
-                      font-weight: 600;
-                      border-radius: 10px;
-                      display: inline-block;
-                    "
-                  >
-                    Verify Email Address
-                  </a>
-                </div>
-
-                <p
-                  style="
-                    font-size: 14px;
-                    line-height: 1.6;
-                    color: #374151;
-                    margin: 0 0 12px;
-                  "
-                >
-                  ⏳ This verification link will expire in
-                  <strong>24 hours</strong>.
-                </p>
-
-                <p
-                  style="
-                    font-size: 14px;
-                    line-height: 1.6;
-                    color: #6b7280;
-                  "
-                >
-                  If you did not create this account, you can safely ignore this
-                  email.
-                </p>
-              </td>
-            </tr>
-
-            <tr>
-              <td
-                style="
-                  padding: 20px 32px;
-                  background-color: #f9fafb;
-                  font-size: 13px;
-                  color: #6b7280;
-                  text-align: center;
-                "
-              >
-                <p style="margin: 0 0 6px">
-                  Need help? Contact us at
-                  <a
-                    href="mailto:support@shrix.store"
-                    style="color: #f59e0b; text-decoration: none"
-                    >support@shrix.store</a
-                  >
-                </p>
-                <p style="margin: 0">
-                  © ${new Date().getFullYear()} Shrix. All rights reserved.
-                </p>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-  </body>
+<head><meta charset="UTF-8" /></head>
+<body style="font-family:Arial;background:#f9fafb">
+  <h2>Welcome to Shrix 🎉</h2>
+  <p>Please verify your email to activate your account.</p>
+  <a href="${verifyLink}" style="padding:12px 20px;background:#f97316;color:#fff;text-decoration:none;border-radius:6px">
+    Verify Email
+  </a>
+  <p>This link expires in 24 hours.</p>
+</body>
 </html>
 `;
 
@@ -182,29 +54,34 @@ const register = async (req, res, next) => {
       message: "Registration successful. Please verify your email.",
     });
 
+    // 📧 Send email (async, non-blocking)
     sendEmail({
       to: email,
       subject: "Welcome to Shrix 🎉 Please verify your email",
       html: emailHtml,
     }).catch((err) => {
-      console.error("Email send failed:", err.message);
+      console.error("❌ Email send failed:", err.message);
     });
-
-    return; // ✅ stop execution
   } catch (error) {
     next(error);
   }
 };
+
+/* ================= VERIFY EMAIL ================= */
 const verifyEmail = async (req, res) => {
   const { token } = req.query;
 
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
   const user = await User.findOne({
-    emailVerificationToken: token,
+    emailVerificationToken: hashedToken,
     emailVerificationExpires: { $gt: Date.now() },
   });
 
   if (!user) {
-    return res.status(400).json({ error: "Invalid or expired token" });
+    return res.redirect(
+      `${process.env.FRONTEND_URL}/verify-email?status=invalid`
+    );
   }
 
   user.emailVerified = true;
@@ -212,7 +89,9 @@ const verifyEmail = async (req, res) => {
   user.emailVerificationExpires = null;
   await user.save();
 
-  res.status(200).json({ message: "Email verified successfully" });
+  return res.redirect(
+    `${process.env.FRONTEND_URL}/verify-email?status=success`
+  );
 };
 
 /* ================= LOGIN ================= */
@@ -225,14 +104,12 @@ const login = async (req, res, next) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    // 🔒 BLOCKED USER CHECK (ADD THIS)
     if (user.isActive === false) {
       return res.status(403).json({
         error: "Your account has been blocked. Contact support.",
       });
     }
 
-    // ✅ Check email verification AFTER fetching user
     if (!user.emailVerified) {
       return res.status(401).json({
         error: "Please verify your email before logging in",
@@ -270,24 +147,15 @@ const googleLogin = async (req, res) => {
 
     let user = await User.findOne({ email });
 
-    // If user does NOT exist → create Google user
     if (!user) {
       const randomPassword = crypto.randomBytes(32).toString("hex");
 
       user = await User.create({
         name: name || email.split("@")[0],
         email,
-        password: randomPassword, // will be hashed
+        password: randomPassword,
         emailVerified: true,
       });
-    }
-
-    // If user exists but email not verified → auto verify
-    if (!user.emailVerified) {
-      user.emailVerified = true;
-      user.emailVerificationToken = null;
-      user.emailVerificationExpires = null;
-      await user.save();
     }
 
     const token = jwt.sign(
@@ -297,10 +165,7 @@ const googleLogin = async (req, res) => {
     );
 
     res.status(200).json({
-      user: {
-        name: user.name,
-        role: user.role,
-      },
+      user: { name: user.name, role: user.role },
       token,
     });
   } catch (error) {
