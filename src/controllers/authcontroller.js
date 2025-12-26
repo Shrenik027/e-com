@@ -33,7 +33,7 @@ const register = async (req, res, next) => {
       emailVerificationExpires: Date.now() + 24 * 60 * 60 * 1000,
     });
 
-    const verifyLink = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
+    const verifyLink = `${process.env.BACKEND_URL}/api/v1/auth/verify-email?token=${verificationToken}`;
 
     const emailHtml = `
 <!DOCTYPE html>
