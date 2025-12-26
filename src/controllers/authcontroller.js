@@ -71,6 +71,12 @@ const register = async (req, res, next) => {
 const verifyEmail = async (req, res) => {
   const { token } = req.query;
 
+  if (!token) {
+    return res.redirect(
+      `${process.env.FRONTEND_URL}/verify-email?status=invalid`
+    );
+  }
+
   const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
   const user = await User.findOne({
@@ -81,6 +87,12 @@ const verifyEmail = async (req, res) => {
   if (!user) {
     return res.redirect(
       `${process.env.FRONTEND_URL}/verify-email?status=invalid`
+    );
+  }
+
+  if (user.emailVerified) {
+    return res.redirect(
+      `${process.env.FRONTEND_URL}/verify-email?status=already`
     );
   }
 
