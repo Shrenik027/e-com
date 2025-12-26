@@ -1,5 +1,7 @@
 const Order = require("../models/Order.model");
 const Cart = require("../models/Cart.model");
+const sendEmail = require("../utils/sendEmail");
+const User = require("../models/User.model");
 
 async function placeOrder(userId, address) {
   const cart = await Cart.findOne({ user: userId });
@@ -25,9 +27,12 @@ async function placeOrder(userId, address) {
     shipping: cart.shipping,
     total: cart.total,
     couponCode: cart.coupon ? String(cart.coupon) : null,
+    paymentMethod: "cod",
+    paymentStatus: "pending",
+    orderStatus: "placed",
   });
 
-  // Clear cart AFTER order is created
+  // 🧹 Clear cart AFTER order is created
   cart.items = [];
   cart.coupon = null;
   cart.subtotal = 0;
@@ -36,6 +41,20 @@ async function placeOrder(userId, address) {
   cart.total = 0;
   cart.shippingMethod = null;
   await cart.save();
+
+  // 📧 SEND COD ORDER EMAIL (NON-BLOCKING)
+  const user = await User.findById(userId).select("email name");
+
+  sendEmail({
+    to: user.email,
+    subject: `Order Placed Successfully – #${order._id}`,
+    html: `
+      <h2>Thanks for your order, ${user.name} 👋</h2>
+      <p>Your order <strong>#${order._id}</strong> has been placed successfully.</p>
+      <p><strong>Payment Method:</strong> Cash on Delivery</p>
+      <p>We’ll notify you when your order is shipped.</p>
+    `,
+  }).catch(console.error);
 
   return order;
 }

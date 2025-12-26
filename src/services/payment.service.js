@@ -2,6 +2,8 @@ const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const Payment = require("../models/Payment.model");
 const Order = require("../models/Order.model");
+const sendEmail = require("../utils/sendEmail");
+const User = require("../models/User.model");
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -62,10 +64,22 @@ exports.verifyPayment = async ({
   payment.status = "paid";
   await payment.save();
 
-  const order = await Order.findById(payment.order);
+  const order = await Order.findById(payment.order).populate("user");
+
   order.paymentStatus = "paid";
   order.orderStatus = "confirmed";
   await order.save();
+
+  // 📧 SEND PAYMENT SUCCESS EMAIL (NON-BLOCKING)
+  sendEmail({
+    to: order.user.email,
+    subject: `Payment Successful – Order #${order._id}`,
+    html: `
+      <h2>Payment Successful 🎉</h2>
+      <p>Your payment for order <strong>#${order._id}</strong> has been confirmed.</p>
+      <p>We’re preparing your order for shipment.</p>
+    `,
+  }).catch(console.error);
 
   return { payment, order };
 };
