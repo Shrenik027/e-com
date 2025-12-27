@@ -34,7 +34,7 @@ async function placeOrder(userId, address, paymentMethod) {
     total: cart.total,
     couponCode: cart.coupon ? String(cart.coupon) : null,
     paymentMethod: normalizedPaymentMethod,
-    paymentStatus: "pending", // ✅ FIXED
+    paymentStatus: normalizedPaymentMethod === "cod" ? "pending" : "pending",
     orderStatus: "placed",
   });
 
@@ -53,7 +53,7 @@ async function placeOrder(userId, address, paymentMethod) {
   // ✅ SEND EMAIL ONLY FOR COD
   if (normalizedPaymentMethod === "cod") {
     order.orderStatus = "confirmed";
-    order.paymentStatus = "cod_pending";
+
     await order.save();
 
     sendEmail({

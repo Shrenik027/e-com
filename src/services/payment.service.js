@@ -71,15 +71,15 @@ exports.verifyPayment = async ({
     };
   }
 
+  payment.status = "paid";
   payment.razorpayPaymentId = razorpay_payment_id;
   payment.razorpaySignature = razorpay_signature;
-  payment.status = "paid";
   await payment.save();
 
   const order = await Order.findById(payment.order);
   const user = await User.findById(payment.user).select("email name");
 
-  if (order.orderStatus === "confirmed") {
+  if (order.paymentStatus === "paid") {
     return { payment, order };
   }
 
