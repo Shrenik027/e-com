@@ -1,4 +1,6 @@
 exports.adminOrderEmail = ({ order, user }) => {
+  const addr = order.address || {};
+
   const itemsHtml = order.items
     .map((i) => `<li>${i.name} × ${i.quantity} — ₹${i.total}</li>`)
     .join("");
@@ -14,9 +16,9 @@ exports.adminOrderEmail = ({ order, user }) => {
 
     <h3>Shipping Address</h3>
     <p>
-      ${order.address.street}<br/>
-      ${order.address.city}, ${order.address.state}<br/>
-      ${order.address.pincode}
+      ${addr.street || ""}<br/>
+      ${addr.city || ""} ${addr.state || ""}<br/>
+      ${addr.pincode || ""}
     </p>
 
     <h3>Order Details</h3>
