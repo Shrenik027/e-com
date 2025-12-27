@@ -4,7 +4,7 @@ const sendEmail = require("../utils/sendEmail");
 const User = require("../models/User.model");
 const { adminOrderEmail } = require("../utils/emailTemplates");
 
-async function placeOrder(userId, address) {
+async function placeOrder(userId, address, paymentMethod) {
   const cart = await Cart.findOne({ user: userId });
 
   if (!cart || cart.items.length === 0) {
@@ -28,12 +28,12 @@ async function placeOrder(userId, address) {
     shipping: cart.shipping,
     total: cart.total,
     couponCode: cart.coupon ? String(cart.coupon) : null,
-    paymentMethod: "cod",
-    paymentStatus: "pending",
+    paymentMethod,
+    paymentStatus: paymentMethod === "cod" ? "pending" : "initiated",
     orderStatus: "placed",
   });
 
-  // 🧹 Clear cart AFTER order is created
+  // 🧹 Clear cart
   cart.items = [];
   cart.coupon = null;
   cart.subtotal = 0;
@@ -43,25 +43,22 @@ async function placeOrder(userId, address) {
   cart.shippingMethod = null;
   await cart.save();
 
-  // 📧 SEND COD ORDER EMAIL (NON-BLOCKING)
   const user = await User.findById(userId).select("email name");
 
-  sendEmail({
-    to: user.email,
-    subject: `Order Placed Successfully – #${order._id}`,
-    html: `
-      <h2>Thanks for your order, ${user.name} 👋</h2>
-      <p>Your order <strong>#${order._id}</strong> has been placed successfully.</p>
-      <p><strong>Payment Method:</strong> Cash on Delivery</p>
-      <p>We’ll notify you when your order is shipped.</p>
-    `,
-  }).catch(console.error);
+  // ✅ SEND EMAIL ONLY FOR COD
+  if (paymentMethod === "cod") {
+    sendEmail({
+      to: user.email,
+      subject: `Order Placed – #${order._id}`,
+      html: `<p>Your COD order has been placed.</p>`,
+    }).catch(console.error);
 
-  sendEmail({
-    to: process.env.ADMIN_EMAIL,
-    subject: `🛒 New COD Order – #${order._id}`,
-    html: adminOrderEmail({ order, user }),
-  }).catch(console.error);
+    sendEmail({
+      to: process.env.ADMIN_EMAIL,
+      subject: `🛒 New COD Order – #${order._id}`,
+      html: adminOrderEmail({ order, user }),
+    }).catch(console.error);
+  }
 
   return order;
 }

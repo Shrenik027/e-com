@@ -3,13 +3,13 @@ const orderService = require("../services/order.service");
 exports.placeOrder = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const { address } = req.body;
+    const { address, paymentMethod } = req.body;
 
     if (!address) {
       return res.status(400).json({ error: "Address is required" });
     }
 
-    const order = await orderService.placeOrder(userId, address);
+    const order = await orderService.placeOrder(userId, address, paymentMethod);
 
     res.status(201).json({
       message: "Order placed successfully",
