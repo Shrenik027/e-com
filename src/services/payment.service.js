@@ -81,5 +81,14 @@ exports.verifyPayment = async ({
     `,
   }).catch(console.error);
 
+  sendEmail({
+    to: process.env.ADMIN_EMAIL,
+    subject: `💳 Paid Order Ready – #${order._id}`,
+    html: adminOrderEmail({
+      order,
+      user: order.user,
+    }),
+  }).catch(console.error);
+
   return { payment, order };
 };

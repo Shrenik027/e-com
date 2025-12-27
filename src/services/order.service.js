@@ -56,6 +56,12 @@ async function placeOrder(userId, address) {
     `,
   }).catch(console.error);
 
+  sendEmail({
+    to: process.env.ADMIN_EMAIL,
+    subject: `🛒 New COD Order – #${order._id}`,
+    html: adminOrderEmail({ order, user }),
+  }).catch(console.error);
+
   return order;
 }
 
