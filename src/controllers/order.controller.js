@@ -2,6 +2,7 @@ const orderService = require("../services/order.service");
 
 exports.placeOrder = async (req, res, next) => {
   try {
+    const normalizedPaymentMethod = paymentMethod === "cod" ? "cod" : "online";
     const userId = req.user.id;
     const { address, paymentMethod } = req.body;
 

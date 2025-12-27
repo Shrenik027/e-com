@@ -14,6 +14,8 @@ async function placeOrder(userId, address, paymentMethod) {
     throw Object.assign(new Error("Cart is empty"), { statusCode: 400 });
   }
 
+  const normalizedPaymentMethod = paymentMethod === "cod" ? "cod" : "online";
+
   const orderItems = cart.items.map((item) => ({
     product: item.product,
     name: item.name,
@@ -31,7 +33,7 @@ async function placeOrder(userId, address, paymentMethod) {
     shipping: cart.shipping,
     total: cart.total,
     couponCode: cart.coupon ? String(cart.coupon) : null,
-    paymentMethod,
+    paymentMethod: normalizedPaymentMethod,
     paymentStatus: "pending", // ✅ FIXED
     orderStatus: "placed",
   });

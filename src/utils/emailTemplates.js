@@ -40,33 +40,25 @@ exports.orderConfirmedEmail = ({ order, user }) => `
     <table width="100%" cellpadding="0" cellspacing="0">
       <tr>
         <td align="center" style="padding:32px 16px">
-          <table width="100%" style="max-width:560px;background:#ffffff;border-radius:10px;overflow:hidden;border:1px solid #e5e7eb">
+          <table width="100%" style="max-width:560px;background:#ffffff;border-radius:10px;border:1px solid #e5e7eb">
 
-            <!-- Header -->
             <tr>
               <td style="padding:24px 28px;background:#111827;color:#ffffff">
-                <h1 style="margin:0;font-size:20px;font-weight:600">
-                  Order confirmed
-                </h1>
+                <h1 style="margin:0;font-size:20px">Order confirmed</h1>
                 <p style="margin:6px 0 0;font-size:13px;color:#d1d5db">
                   Thank you for shopping with Shrix
                 </p>
               </td>
             </tr>
 
-            <!-- Content -->
             <tr>
               <td style="padding:28px">
-                <p style="font-size:14px;margin:0 0 16px">
-                  Hi ${user.name},
-                </p>
+                <p>Hi ${user.name},</p>
 
-                <p style="font-size:14px;line-height:1.6;margin:0 0 20px">
-                  Your order has been successfully placed and is now being processed.
-                </p>
+                <p>Your order has been successfully placed and is now being processed.</p>
 
-                <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:14px;margin-bottom:20px">
-                  <p style="margin:0;font-size:13px;line-height:1.6">
+                <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:14px;margin:16px 0">
+                  <p style="font-size:13px">
                     <strong>Order ID:</strong> #${order._id}<br/>
                     <strong>Order Total:</strong> ₹${order.total}<br/>
                     <strong>Payment Method:</strong> ${
@@ -75,26 +67,26 @@ exports.orderConfirmedEmail = ({ order, user }) => `
                         : "Online Payment"
                     }<br/>
                     <strong>Payment Status:</strong> ${
-                      order.paymentMethod === "cod" ? "Pay on delivery" : "Paid"
+                      order.paymentStatus === "paid"
+                        ? "Paid"
+                        : "Pay on delivery"
                     }
                   </p>
                 </div>
 
-                <p style="font-size:14px;line-height:1.6;margin:0 0 16px">
+                <p>
                   ${
-                    order.paymentMethod === "cod"
-                      ? "Please keep the payment amount ready at the time of delivery."
-                      : "We’ve received your payment successfully."
+                    order.paymentStatus === "paid"
+                      ? "We’ve received your payment successfully."
+                      : "Please keep the payment amount ready at the time of delivery."
                   }
                 </p>
 
-                <p style="font-size:14px;line-height:1.6;margin:0">
-                  You’ll receive another email once your order is shipped.
-                </p>
+                <p>You’ll receive another email once your order is shipped.</p>
 
-                <p style="font-size:13px;color:#6b7280;margin:20px 0 0">
+                <p style="font-size:13px;color:#6b7280">
                   Need help? 
-                  <a href="mailto:support@shrix.store" style="color:#f59e0b;text-decoration:none">
+                  <a href="mailto:support@shrix.store" style="color:#f59e0b">
                     support@shrix.store
                   </a>
                 </p>
@@ -102,7 +94,7 @@ exports.orderConfirmedEmail = ({ order, user }) => `
             </tr>
 
             <tr>
-              <td style="padding:16px 28px;background:#f9fafb;font-size:12px;color:#6b7280;text-align:center">
+              <td style="padding:16px;text-align:center;font-size:12px;color:#6b7280">
                 © ${new Date().getFullYear()} Shrix. All rights reserved.
               </td>
             </tr>
