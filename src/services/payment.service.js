@@ -60,7 +60,7 @@ exports.verifyPayment = async ({
     throw Object.assign(new Error("Payment not found"), { statusCode: 404 });
   }
 
-  // ✅ IDPOTENCY CHECK
+  // ✅ IDPOTENCY
   if (payment.status === "paid") {
     return {
       payment,
@@ -73,15 +73,16 @@ exports.verifyPayment = async ({
   payment.status = "paid";
   await payment.save();
 
-  const order = await Order.findById(payment.order).populate("user");
+  const order = await Order.findById(payment.order);
+  const user = await User.findById(payment.user).select("email name");
 
   order.paymentStatus = "paid";
   order.orderStatus = "confirmed";
   await order.save();
 
-  // 📧 USER EMAIL
+  // 📧 USER EMAIL (NOW FIXED)
   sendEmail({
-    to: order.user.email,
+    to: user.email,
     subject: `Payment Successful – Order #${order._id}`,
     html: `
       <h2>Payment Successful 🎉</h2>
@@ -93,7 +94,7 @@ exports.verifyPayment = async ({
   sendEmail({
     to: process.env.ADMIN_EMAIL,
     subject: `💳 Paid Order Ready – #${order._id}`,
-    html: adminOrderEmail({ order, user: order.user }),
+    html: adminOrderEmail({ order, user }),
   }).catch(console.error);
 
   return { payment, order };
