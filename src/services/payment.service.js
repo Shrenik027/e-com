@@ -4,6 +4,7 @@ const Payment = require("../models/Payment.model");
 const Order = require("../models/Order.model");
 const sendEmail = require("../utils/sendEmail");
 const User = require("../models/User.model");
+const { adminOrderEmail } = require("../utils/emailTemplates");
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,

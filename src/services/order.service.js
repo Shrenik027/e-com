@@ -2,6 +2,7 @@ const Order = require("../models/Order.model");
 const Cart = require("../models/Cart.model");
 const sendEmail = require("../utils/sendEmail");
 const User = require("../models/User.model");
+const { adminOrderEmail } = require("../utils/emailTemplates");
 
 async function placeOrder(userId, address) {
   const cart = await Cart.findOne({ user: userId });
