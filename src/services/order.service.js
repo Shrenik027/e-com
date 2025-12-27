@@ -29,7 +29,7 @@ async function placeOrder(userId, address, paymentMethod) {
     total: cart.total,
     couponCode: cart.coupon ? String(cart.coupon) : null,
     paymentMethod,
-    paymentStatus: paymentMethod === "cod" ? "pending" : "initiated",
+    paymentStatus: "pending", // ✅ FIXED
     orderStatus: "placed",
   });
 
