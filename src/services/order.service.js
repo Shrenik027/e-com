@@ -51,7 +51,7 @@ async function placeOrder(userId, address, paymentMethod) {
   const user = await User.findById(userId).select("email name");
 
   // ✅ SEND EMAIL ONLY FOR COD
-  if (paymentMethod === "cod") {
+  if (normalizedPaymentMethod === "cod") {
     order.orderStatus = "confirmed";
     await order.save();
 
