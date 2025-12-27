@@ -60,6 +60,14 @@ exports.verifyPayment = async ({
     throw Object.assign(new Error("Payment not found"), { statusCode: 404 });
   }
 
+  // ✅ IDPOTENCY CHECK
+  if (payment.status === "paid") {
+    return {
+      payment,
+      order: await Order.findById(payment.order),
+    };
+  }
+
   payment.razorpayPaymentId = razorpay_payment_id;
   payment.razorpaySignature = razorpay_signature;
   payment.status = "paid";
@@ -71,24 +79,21 @@ exports.verifyPayment = async ({
   order.orderStatus = "confirmed";
   await order.save();
 
-  // 📧 SEND PAYMENT SUCCESS EMAIL (NON-BLOCKING)
+  // 📧 USER EMAIL
   sendEmail({
     to: order.user.email,
     subject: `Payment Successful – Order #${order._id}`,
     html: `
       <h2>Payment Successful 🎉</h2>
       <p>Your payment for order <strong>#${order._id}</strong> has been confirmed.</p>
-      <p>We’re preparing your order for shipment.</p>
     `,
   }).catch(console.error);
 
+  // 📧 ADMIN EMAIL
   sendEmail({
     to: process.env.ADMIN_EMAIL,
     subject: `💳 Paid Order Ready – #${order._id}`,
-    html: adminOrderEmail({
-      order,
-      user: order.user,
-    }),
+    html: adminOrderEmail({ order, user: order.user }),
   }).catch(console.error);
 
   return { payment, order };
