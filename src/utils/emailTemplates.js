@@ -69,17 +69,21 @@ exports.orderConfirmedEmail = ({ order, user }) => `
                     <strong>Payment Status:</strong> ${
                       order.paymentStatus === "paid"
                         ? "Paid"
-                        : "Pay on delivery"
+                        : order.paymentStatus === "cod_pending"
+                        ? "Pay on delivery"
+                        : "Pending"
                     }
+
                   </p>
                 </div>
 
                 <p>
-                  ${
-                    order.paymentStatus === "paid"
-                      ? "We’ve received your payment successfully."
-                      : "Please keep the payment amount ready at the time of delivery."
-                  }
+                 ${
+                   order.paymentStatus === "paid"
+                     ? "We’ve received your payment successfully."
+                     : "Please keep the payment amount ready at the time of delivery."
+                 }
+
                 </p>
 
                 <p>You’ll receive another email once your order is shipped.</p>

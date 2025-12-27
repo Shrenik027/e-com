@@ -53,6 +53,7 @@ async function placeOrder(userId, address, paymentMethod) {
   // ✅ SEND EMAIL ONLY FOR COD
   if (normalizedPaymentMethod === "cod") {
     order.orderStatus = "confirmed";
+    order.paymentStatus = "cod_pending";
     await order.save();
 
     sendEmail({
