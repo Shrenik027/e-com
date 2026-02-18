@@ -44,6 +44,7 @@ app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/admin/orders", adminOrderRoutes);
 app.use("/api/v1/admin/users", adminUserRoutes);
 app.use("/api/v1/admin/dashboard", adminDashboardRoutes);
+app.use("/api/v1/analytics", require("./routes/analytics.routes"));
 
 // Global Error Handler (must be last)
 app.use(errorMiddleware);
